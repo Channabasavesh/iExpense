@@ -13,6 +13,10 @@ struct AddView: View {
     @State private var amount = ""
     @State private var type = "Personal"
     
+    @State private var showingAlert = false
+    @State private var errorTitle = ""
+    @State private var errorMessage = ""
+    
     static let types = ["Business", "Personal"]
     
     @ObservedObject var expenses: Expenses
@@ -28,14 +32,19 @@ struct AddView: View {
                     }
                 }
                 TextField("Amount", text: $amount)
-                    .keyboardType(.numberPad)
-                
+            }
+            .alert(isPresented: $showingAlert) { () -> Alert in
+                Alert(title: Text(errorTitle), message: Text(errorMessage), dismissButton: .default(Text("OK")))
             }
             .navigationBarItems(trailing: Button("Save", action: {
                 if let actualAmount = Int(self.amount) {
                     let item = ExpenseItem(name: self.name, type: self.type, amount: actualAmount)
                     self.expenses.items.append(item)
                     self.presentationMode.wrappedValue.dismiss()
+                } else {
+                    showingAlert = true
+                    errorTitle = "Sorry"
+                    errorMessage = "You need to enter the amount in numbers"
                 }
             }))
             .navigationBarTitle("Add new expense")
